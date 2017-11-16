@@ -73,7 +73,7 @@ def callback():
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
 	query = event.message.text
-	response = decoder(event.message.text)
+	response = decoder(query)
 	profile = line_bot_api.get_profile(event.source.user_id)
 	store_data(event.timestamp, profile.display_name, query, response)
 
