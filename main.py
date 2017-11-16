@@ -19,7 +19,7 @@ from google.cloud import storage
 
 from att_seq2seq.model import AttSeq2Seq
 from att_seq2seq.decoder import Decoder
-from data_utils.converter import DataConverter
+from converter import DataConverter
 
 
 EMBED_SIZE = 100
