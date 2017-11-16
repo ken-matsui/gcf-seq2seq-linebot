@@ -15,6 +15,7 @@ from linebot.models import (
 	MessageEvent, TextMessage, TextSendMessage,
 )
 from google.cloud import datastore
+from google.cloud import storage
 
 from att_seq2seq.model import AttSeq2Seq
 from att_seq2seq.decoder import Decoder
@@ -35,6 +36,7 @@ handler = WebhookHandler(os.environ['CHANNEL_SECRET'])
 
 # Instantiates a client
 datastore_client = datastore.Client()
+storage_client = storage.Client()
 
 data_converter = DataConverter(DATA_PATH)
 vocab_size = len(data_converter.vocab)
@@ -42,12 +44,15 @@ model = AttSeq2Seq(vocab_size=vocab_size,
 				   embed_size=EMBED_SIZE,
 				   hidden_size=HIDDEN_SIZE,
 				   batch_col_size=BATCH_COL_SIZE)
-# 最新のモデルデータを使用する．
-# lst = glob.glob(TRAIN_PATH + "*.npz")
-# npz = max(list(map(lambda s: int(s.replace(TRAIN_PATH, "").replace(".npz", "")), lst)))
-# npz = TRAIN_PATH + str(npz) + ".npz"
-npz = TRAIN_PATH + '60.npz'
-decoder = Decoder(model, data_converter, npz)
+
+# CloudStorageからmodelファイルをDownload
+npz = '60.npz'
+bucket = storage_client.get_bucket('model-files') # rootとなるbucketを指定
+blob = storage.Blob('chainer/att-seq2seq/' + npz, bucket) # rootから子を指定
+with open('./60.npz', 'wb') as file_obj: # localに保存するファイルを指定
+	blob.download_to_file(file_obj)
+decoder = Decoder(model, data_converter, './' + npz)
+os.remove('./' + npz) # 使用後は消去
 
 
 @app.route("/callback", methods=['POST'])
