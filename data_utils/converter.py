@@ -5,6 +5,7 @@ import numpy as np
 from google.cloud import language
 from google.cloud.language import enums
 from google.cloud.language import types
+from google.cloud import storage
 
 FLAG_GPU = False
 if FLAG_GPU:
@@ -13,22 +14,26 @@ if FLAG_GPU:
 else:
 	xp = np
 
+
 # データ変換クラスの定義
 class DataConverter:
-	def __init__(self, path):
+	def __init__(self):
 		'''
 		クラスの初期化
-		:param path: dataがあるディレクトリ
 		'''
 		# Instantiates a client
 		self.client = language.LanguageServiceClient()
 		# 単語辞書の登録
 		self.vocab = {}
-		# 単語辞書ファイルからload
-		with open(path + 'vocab.txt', 'r') as f:
-			lines = f.readlines()
+		# CloudStorageからvocabファイルをDownload
+		txt = 'vocab.txt'
+		storage_client = storage.Client()
+		bucket = storage_client.get_bucket('ml-datas')
+		blob = storage.Blob('att-seq2seq/' + txt, bucket)
+		lines = blob.download_as_string().decode('utf-8').split('\n')
 		for i, line in enumerate(lines):
-			self.vocab[line.replace('\n', '')] = i
+			if line: # 空行を弾く
+				self.vocab[line] = i
 
 	def sentence2words(self, sentence):
 		'''

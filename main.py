@@ -26,8 +26,6 @@ EMBED_SIZE = 100
 HIDDEN_SIZE = 100
 BATCH_SIZE = 20
 BATCH_COL_SIZE = 15
-DATA_PATH = './data/'
-TRAIN_PATH = './train/'
 
 app = Flask(__name__)
 
@@ -38,7 +36,7 @@ handler = WebhookHandler(os.environ['CHANNEL_SECRET'])
 datastore_client = datastore.Client()
 storage_client = storage.Client()
 
-data_converter = DataConverter(DATA_PATH)
+data_converter = DataConverter()
 vocab_size = len(data_converter.vocab)
 model = AttSeq2Seq(vocab_size=vocab_size,
 				   embed_size=EMBED_SIZE,
