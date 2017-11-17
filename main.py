@@ -75,7 +75,7 @@ def handle_message(event):
 	query = event.message.text
 	response = decoder(query)
 	profile = line_bot_api.get_profile(event.source.user_id)
-	store_data(event.timestamp, profile.display_name, query, response)
+	store_data(event.timestamp//1000, profile.display_name, query, response)
 
 	line_bot_api.reply_message(
 		event.reply_token,
@@ -86,7 +86,7 @@ def store_data(timestamp, user, query, response):
 	# The kind for the new entity
 	kind = 'Talk'
 	# The name/ID for the new entity
-	time = datetime.fromtimestamp(timestamp//1000)
+	time = datetime.fromtimestamp(timestamp)
 	time += timedelta(hours=9) # timezoneをJSTに調整
 	name = str(time)
 	# The Cloud Datastore key for the new entity
