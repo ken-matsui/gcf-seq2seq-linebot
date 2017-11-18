@@ -53,9 +53,8 @@ class DataConverter:
 		sentence_words = []
 		for token in tokens:
 			w = token.text.content # 単語
-			if len(w) == 0: # 不正文字は省略
-				continue
-			sentence_words.append(w)
+			if len(w) != 0: # 不正文字は省略
+				sentence_words.append(w)
 		sentence_words.append("<eos>") # 最後にvocabに登録している<eos>を代入する
 		return sentence_words
 
