@@ -46,7 +46,7 @@ model = AttSeq2Seq(vocab_size=vocab_size,
 # CloudStorageからmodelファイルをDownload
 npz = '80.npz'
 bucket = storage_client.get_bucket('model-files') # rootとなるbucketを指定
-blob = storage.Blob('chainer/att-seq2seq/' + npz, bucket) # rootから子を指定
+blob = storage.Blob('chainer/att-seq2seq/v1/' + npz, bucket) # rootから子を指定
 with open('./' + npz, 'wb') as file_obj: # localに保存するファイルを指定
 	blob.download_to_file(file_obj)
 decoder = Decoder(model, data_converter, './' + npz)

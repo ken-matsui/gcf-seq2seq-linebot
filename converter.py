@@ -29,7 +29,7 @@ class DataConverter:
 		txt = 'vocab.txt'
 		storage_client = storage.Client()
 		bucket = storage_client.get_bucket('ml-datas')
-		blob = storage.Blob('att-seq2seq/' + txt, bucket)
+		blob = storage.Blob('att-seq2seq/v1/' + txt, bucket)
 		lines = blob.download_as_string().decode('utf-8').split('\n')
 		for i, line in enumerate(lines):
 			if line: # 空行を弾く
