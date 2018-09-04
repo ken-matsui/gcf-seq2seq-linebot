@@ -53,8 +53,8 @@ decoder = Decoder(model, data_converter, './' + npz)
 os.remove('./' + npz) # 使用後は消去
 
 
-@app.route("/callback", methods=['POST'])
-def callback():
+# @app.route("/callback", methods=['POST'])
+def callback(request):
 	# get X-Line-Signature header value
 	signature = request.headers['X-Line-Signature']
 
@@ -103,5 +103,5 @@ def store_data(timestamp, user, query, response):
 	datastore_client.put(talk)
 
 
-if __name__ == "__main__":
-	app.run()
+# if __name__ == "__main__":
+# 	app.run()
