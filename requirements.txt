@@ -12,7 +12,7 @@ google-api-core==0.1.1
 google-auth==1.2.1
 google-cloud-core==0.28.0
 google-cloud-datastore==1.4.0
-google-cloud-language==1.0.0
+google-cloud-language==1.0.2
 google-cloud-storage==1.6.0
 google-gax==0.15.16
 google-resumable-media==0.3.1
