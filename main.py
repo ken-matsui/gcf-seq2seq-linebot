@@ -83,11 +83,6 @@ def store_data(timestamp, user, query, response):
     datastore_client.put(talk)
 
 
-def create_response(query):
-    response = DECODER(query)
-    return response
-
-
 def parse_body(body):
     receive_json = json.loads(body)
     message = receive_json['events'][0]
@@ -103,7 +98,7 @@ def callback(request):
         print("Request body: " + body)
         receive_json = parse_body(body)
         query = receive_json['message']['text']
-        response = create_response(query)
+        response = DECODER(query)
         profile = line_bot_api.get_profile(receive_json['source']['userId'])
         timestamp = int(receive_json['timestamp']) // 1000
         store_data(timestamp, profile.display_name, query, response)
