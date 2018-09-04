@@ -109,5 +109,5 @@ def callback(request):
         )
     except:
         logging.error(sys.exc_info())
-        return f'ERROR'
-    return f'OK'
+        return 'ERROR'
+    return 'OK'
