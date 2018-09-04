@@ -40,25 +40,6 @@ datastore_client = datastore.Client()
 storage_client = storage.Client()
 
 
-def store_data(timestamp, user, query, response):
-    # The kind for the new entity
-    kind = 'Talk'
-    # The name/ID for the new entity
-    time = datetime.fromtimestamp(timestamp)
-    time += timedelta(hours=9)  # timezoneをJSTに調整
-    name = str(time)
-    # The Cloud Datastore key for the new entity
-    talk_key = datastore_client.key(kind, name)
-    # Prepares the new entity
-    talk = datastore.Entity(key=talk_key)
-    talk['1.TimeStamp'] = timestamp
-    talk['2.User'] = user
-    talk['3.Query'] = query
-    talk['4.Response'] = response
-    # Saves the entity
-    datastore_client.put(talk)
-
-
 def create_decoder():
     data_converter = DataConverter()
     vocab_size = len(data_converter.vocab)
@@ -80,9 +61,30 @@ def create_decoder():
         return Decoder(model, data_converter, npz_path)
 
 
+DECODER = create_decoder()
+
+
+def store_data(timestamp, user, query, response):
+    # The kind for the new entity
+    kind = 'Talk'
+    # The name/ID for the new entity
+    time = datetime.fromtimestamp(timestamp)
+    time += timedelta(hours=9)  # timezoneをJSTに調整
+    name = str(time)
+    # The Cloud Datastore key for the new entity
+    talk_key = datastore_client.key(kind, name)
+    # Prepares the new entity
+    talk = datastore.Entity(key=talk_key)
+    talk['1.TimeStamp'] = timestamp
+    talk['2.User'] = user
+    talk['3.Query'] = query
+    talk['4.Response'] = response
+    # Saves the entity
+    datastore_client.put(talk)
+
+
 def create_response(query):
-    decoder = create_decoder()
-    response = decoder(query)
+    response = DECODER(query)
     return response
 
 
