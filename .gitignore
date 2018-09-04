@@ -1,0 +1,12 @@
+app.yaml
+
+venv
+
+__pycache__
+!.gitkeep
+.DS_Store
+.python-version
+
+.idea
+
+matsui*
