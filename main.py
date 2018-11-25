@@ -9,16 +9,9 @@ from datetime import datetime, timedelta
 from linebot import (
     LineBotApi, WebhookHandler
 )
-# from linebot.exceptions import (
-#     InvalidSignatureError
-# )
-# from linebot.models import (
-#     MessageEvent, TextMessage, TextSendMessage,
-# )
 from linebot.models import (
     TextSendMessage,
 )
-from google.cloud import datastore
 from google.cloud import storage
 
 from att_seq2seq.model import AttSeq2Seq
@@ -36,7 +29,6 @@ line_bot_api = LineBotApi(os.environ['CHANNEL_ACCESS_TOKEN'])
 handler = WebhookHandler(os.environ['CHANNEL_SECRET'])
 
 # Instantiates a client
-datastore_client = datastore.Client()
 storage_client = storage.Client()
 
 
@@ -64,25 +56,6 @@ def create_decoder():
 DECODER = create_decoder()
 
 
-def store_data(timestamp, user, query, response):
-    # The kind for the new entity
-    kind = 'Talk'
-    # The name/ID for the new entity
-    time = datetime.fromtimestamp(timestamp)
-    time += timedelta(hours=9)  # timezoneをJSTに調整
-    name = str(time)
-    # The Cloud Datastore key for the new entity
-    talk_key = datastore_client.key(kind, name)
-    # Prepares the new entity
-    talk = datastore.Entity(key=talk_key)
-    talk['1.TimeStamp'] = timestamp
-    talk['2.User'] = user
-    talk['3.Query'] = query
-    talk['4.Response'] = response
-    # Saves the entity
-    datastore_client.put(talk)
-
-
 def parse_body(body):
     receive_json = json.loads(body)
     message = receive_json['events'][0]
@@ -99,9 +72,6 @@ def callback(request):
         receive_json = parse_body(body)
         query = receive_json['message']['text']
         response = DECODER(query)
-        profile = line_bot_api.get_profile(receive_json['source']['userId'])
-        timestamp = int(receive_json['timestamp']) // 1000
-        store_data(timestamp, profile.display_name, query, response)
         # handle webhook body
         line_bot_api.reply_message(
             receive_json['replyToken'],
