@@ -1,0 +1,31 @@
+name: Deploy to Cloud Functions
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - id: auth
+      uses: google-github-actions/auth@v0
+      with:
+        workload_identity_provider: 'projects/${{ secrets.GCP_PROJECT_ID_NUMBER }}/locations/global/workloadIdentityPools/github-actions/providers/gha-provider'
+        service_account: 'ghaction-cloud-functions@${{ secrets.GCP_PROJECT_ID }}.iam.gserviceaccount.com'
+
+    - uses: 'google-github-actions/deploy-cloud-functions@v0'
+      with:
+        name: 'line-bot'
+        runtime: 'python39'
+        entry_point: 'callback'
+        region: 'us-west1'
+        env_vars: BUCKET_NAME=${{ secrets.GCP_BUCKET_NAME }},CHANNEL_ACCESS_TOKEN=${{ secrets.CHANNEL_ACCESS_TOKEN }},CHANNEL_SECRET=${{ secrets.CHANNEL_SECRET }}
