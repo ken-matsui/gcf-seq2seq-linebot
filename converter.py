@@ -40,10 +40,12 @@ class DataConverter:
         """
         # Natural Language API
         # The text to analyze
-        document = language.Document(content=sentence, type_=language.Document.Type.PLAIN_TEXT)
+        document = language.Document(
+            content=sentence, type_=language.Document.Type.PLAIN_TEXT
+        )
         # Detects syntax in the document. You can also analyze HTML with:
         #   document.type == language.Document.Type.HTML
-        tokens = self.client.analyze_syntax(request={'document': document}).tokens
+        tokens = self.client.analyze_syntax(request={"document": document}).tokens
 
         sentence_words = []
         for token in tokens:
