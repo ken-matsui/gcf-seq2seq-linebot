@@ -1,5 +1,9 @@
 # matsukenbot
 
+<a href="https://lin.ee/FPQ9DqS"><img src="https://scdn.line-apps.com/n/line_add_friends/btn/en.png" alt="Add friend" height="36" border="0"></a>
+
+matsukenbot is a LINE bot implemented in seq2seq with attention.
+
 ## Steps
 
 1. Create a GCP project
