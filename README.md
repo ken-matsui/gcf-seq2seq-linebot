@@ -10,6 +10,7 @@
 ```bash
 gcloud functions deploy line-bot --region us-west1 --trigger-http --runtime python37 --allow-unauthenticated --env-vars-file .env.yaml --entry-point callback
 ```
+6. Set the Webhook URL on https://manager.line.biz/account/@YOUR_ID/setting/messaging-api
 
 ### Environment Variables
 
