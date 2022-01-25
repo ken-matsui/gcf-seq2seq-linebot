@@ -11,8 +11,8 @@ class Decoder(object):
         enc_query = self.data_converter.sentence2ids(query)
         dec_response = self.model(enc_query)
         response = self.data_converter.ids2words(dec_response)
-        if "<eos>" in response: # 最後の<eos>を回避
+        if "<eos>" in response:  # 最後の<eos>を回避
             res = "".join(response[0:-1])
-        else: # 含んでない時もある．(出力wordサイズが，15を超えた時？？？)
+        else:  # 含んでない時もある．(出力wordサイズが，15を超えた時？？？)
             res = "".join(response)
         return res

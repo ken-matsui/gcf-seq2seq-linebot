@@ -12,7 +12,7 @@ if FLAG_GPU:
 else:
     xp = np
 
-__all__ = ['AttSeq2Seq']
+__all__ = ["AttSeq2Seq"]
 
 
 # LSTMエンコーダークラス
@@ -27,7 +27,7 @@ class LSTMEncoder(Chain):
         super(LSTMEncoder, self).__init__(
             xe=L.EmbedID(vocab_size, embed_size, ignore_label=-1),
             eh=L.Linear(embed_size, 4 * hidden_size),
-            hh=L.Linear(hidden_size, 4 * hidden_size)
+            hh=L.Linear(hidden_size, 4 * hidden_size),
         )
 
     def __call__(self, x, c, h):
@@ -52,13 +52,19 @@ class AttLSTMDecoder(Chain):
         :param hidden_size: 隠れ層のサイズ
         """
         super(AttLSTMDecoder, self).__init__(
-            ye=L.EmbedID(vocab_size, embed_size, ignore_label=-1), # 単語を単語ベクトルに変換する層
-            eh=L.Linear(embed_size, 4 * hidden_size), # 単語ベクトルを隠れ層の4倍のサイズのベクトルに変換する層
-            hh=L.Linear(hidden_size, 4 * hidden_size), # Decoderの中間ベクトルを隠れ層の4倍のサイズのベクトルに変換する層
-            fh=L.Linear(hidden_size, 4 * hidden_size), # 順向きEncoderの中間ベクトルの加重平均を隠れ層の4倍のサイズのベクトルに変換する層
-            bh=L.Linear(hidden_size, 4 * hidden_size), # 順向きEncoderの中間ベクトルの加重平均を隠れ層の4倍のサイズのベクトルに変換する層
-            he=L.Linear(hidden_size, embed_size), # 隠れ層サイズのベクトルを単語ベクトルのサイズに変換する層
-            ey=L.Linear(embed_size, vocab_size) # 単語ベクトルを語彙数サイズのベクトルに変換する層
+            ye=L.EmbedID(vocab_size, embed_size, ignore_label=-1),  # 単語を単語ベクトルに変換する層
+            eh=L.Linear(embed_size, 4 * hidden_size),  # 単語ベクトルを隠れ層の4倍のサイズのベクトルに変換する層
+            hh=L.Linear(
+                hidden_size, 4 * hidden_size
+            ),  # Decoderの中間ベクトルを隠れ層の4倍のサイズのベクトルに変換する層
+            fh=L.Linear(
+                hidden_size, 4 * hidden_size
+            ),  # 順向きEncoderの中間ベクトルの加重平均を隠れ層の4倍のサイズのベクトルに変換する層
+            bh=L.Linear(
+                hidden_size, 4 * hidden_size
+            ),  # 順向きEncoderの中間ベクトルの加重平均を隠れ層の4倍のサイズのベクトルに変換する層
+            he=L.Linear(hidden_size, embed_size),  # 隠れ層サイズのベクトルを単語ベクトルのサイズに変換する層
+            ey=L.Linear(embed_size, vocab_size),  # 単語ベクトルを語彙数サイズのベクトルに変換する層
         )
 
     def __call__(self, y, c, h, f, b):
@@ -71,10 +77,10 @@ class AttLSTMDecoder(Chain):
         :param b: Attention Modelで計算された逆向きEncoderの加重平均
         :return: 語彙数サイズのベクトル、更新された内部メモリ、更新された中間ベクトル
         """
-        e = F.tanh(self.ye(y)) # 単語を単語ベクトルに変換
+        e = F.tanh(self.ye(y))  # 単語を単語ベクトルに変換
         # 単語ベクトル、Decoderの中間ベクトル、順向きEncoderのAttention、逆向きEncoderのAttentionを使ってLSTM
         c, h = F.lstm(c, self.eh(e) + self.hh(h) + self.fh(f) + self.bh(b))
-        t = self.ey(F.tanh(self.he(h))) # LSTMから出力された中間ベクトルを語彙数サイズのベクトルに変換する
+        t = self.ey(F.tanh(self.he(h)))  # LSTMから出力された中間ベクトルを語彙数サイズのベクトルに変換する
         return t, c, h
 
 
@@ -86,12 +92,18 @@ class Attention(Chain):
         :param hidden_size: 隠れ層のサイズ
         """
         super(Attention, self).__init__(
-            fh=L.Linear(hidden_size, hidden_size), # 順向きのEncoderの中間ベクトルを隠れ層サイズのベクトルに変換する線形結合層
-            bh=L.Linear(hidden_size, hidden_size), # 逆向きのEncoderの中間ベクトルを隠れ層サイズのベクトルに変換する線形結合層
-            hh=L.Linear(hidden_size, hidden_size), # Decoderの中間ベクトルを隠れ層サイズのベクトルに変換する線形結合層
-            hw=L.Linear(hidden_size, 1), # 隠れ層サイズのベクトルをスカラーに変換するための線形結合層
+            fh=L.Linear(
+                hidden_size, hidden_size
+            ),  # 順向きのEncoderの中間ベクトルを隠れ層サイズのベクトルに変換する線形結合層
+            bh=L.Linear(
+                hidden_size, hidden_size
+            ),  # 逆向きのEncoderの中間ベクトルを隠れ層サイズのベクトルに変換する線形結合層
+            hh=L.Linear(
+                hidden_size, hidden_size
+            ),  # Decoderの中間ベクトルを隠れ層サイズのベクトルに変換する線形結合層
+            hw=L.Linear(hidden_size, 1),  # 隠れ層サイズのベクトルをスカラーに変換するための線形結合層
         )
-        self.hidden_size = hidden_size # 隠れ層のサイズを記憶
+        self.hidden_size = hidden_size  # 隠れ層のサイズを記憶
 
     def __call__(self, fs, bs, h):
         """
@@ -101,20 +113,24 @@ class Attention(Chain):
         :param h: Decoderで出力された中間ベクトル
         :return: 順向きのEncoderの中間ベクトルの加重平均と逆向きのEncoderの中間ベクトルの加重平均
         """
-        batch_size = h.data.shape[0] # ミニバッチのサイズを記憶
-        ws = [] # ウェイトを記録するためのリストの初期化
-        sum_w = Variable(xp.zeros((batch_size, 1), dtype='float32')) # ウェイトの合計値を計算するための値を初期化
+        batch_size = h.data.shape[0]  # ミニバッチのサイズを記憶
+        ws = []  # ウェイトを記録するためのリストの初期化
+        sum_w = Variable(
+            xp.zeros((batch_size, 1), dtype="float32")
+        )  # ウェイトの合計値を計算するための値を初期化
         # Encoderの中間ベクトルとDecoderの中間ベクトルを使ってウェイトの計算
         for f, b in zip(fs, bs):
-            w = F.tanh(self.fh(f)+self.bh(b)+self.hh(h)) # 順向きEncoderの中間ベクトル、逆向きEncoderの中間ベクトル、Decoderの中間ベクトルを使ってウェイトの計算
-            w = F.exp(self.hw(w)) # softmax関数を使って正規化する
-            ws.append(w) # 計算したウェイトを記録
+            w = F.tanh(
+                self.fh(f) + self.bh(b) + self.hh(h)
+            )  # 順向きEncoderの中間ベクトル、逆向きEncoderの中間ベクトル、Decoderの中間ベクトルを使ってウェイトの計算
+            w = F.exp(self.hw(w))  # softmax関数を使って正規化する
+            ws.append(w)  # 計算したウェイトを記録
             sum_w += w
         # 出力する加重平均ベクトルの初期化
-        att_f = Variable(xp.zeros((batch_size, self.hidden_size), dtype='float32'))
-        att_b = Variable(xp.zeros((batch_size, self.hidden_size), dtype='float32'))
+        att_f = Variable(xp.zeros((batch_size, self.hidden_size), dtype="float32"))
+        att_b = Variable(xp.zeros((batch_size, self.hidden_size), dtype="float32"))
         for f, b, w in zip(fs, bs, ws):
-            w /= sum_w # ウェイトの和が1になるように正規化
+            w /= sum_w  # ウェイトの和が1になるように正規化
             # ウェイト * Encoderの中間ベクトルを出力するベクトルに足していく
             att_f += F.reshape(F.batch_matmul(f, w), (batch_size, self.hidden_size))
             att_b += F.reshape(F.batch_matmul(b, w), (batch_size, self.hidden_size))
@@ -131,15 +147,15 @@ class AttSeq2Seq(Chain):
         :param hidden_size: 隠れ層のサイズ
         """
         super(AttSeq2Seq, self).__init__(
-            f_encoder = LSTMEncoder(vocab_size, embed_size, hidden_size), # 順向きのEncoder
-            b_encoder = LSTMEncoder(vocab_size, embed_size, hidden_size), # 逆向きのEncoder
-            attention = Attention(hidden_size), # Attention Model
-            decoder = AttLSTMDecoder(vocab_size, embed_size, hidden_size) # Decoder
+            f_encoder=LSTMEncoder(vocab_size, embed_size, hidden_size),  # 順向きのEncoder
+            b_encoder=LSTMEncoder(vocab_size, embed_size, hidden_size),  # 逆向きのEncoder
+            attention=Attention(hidden_size),  # Attention Model
+            decoder=AttLSTMDecoder(vocab_size, embed_size, hidden_size),  # Decoder
         )
         self.vocab_size = vocab_size
         self.embed_size = embed_size
         self.hidden_size = hidden_size
-        self.decode_max_size = batch_col_size # デコードはEOSが出力されれば終了する、出力されない場合の最大出力語彙数
+        self.decode_max_size = batch_col_size  # デコードはEOSが出力されれば終了する、出力されない場合の最大出力語彙数
         # 順向きのEncoderの中間ベクトル、逆向きのEncoderの中間ベクトルを保存するためのリストを初期化
         self.fs = []
         self.bs = []
@@ -156,10 +172,14 @@ class AttSeq2Seq(Chain):
 
         batch_size = len(enc_words[0])  # バッチサイズを記録
         self.reset()  # model内に保存されている勾配をリセット
-        enc_words = [Variable(xp.array(row, dtype='int32')) for row in enc_words]  # 発話リスト内の単語をVariable型に変更
+        enc_words = [
+            Variable(xp.array(row, dtype="int32")) for row in enc_words
+        ]  # 発話リスト内の単語をVariable型に変更
         self.encode(enc_words, batch_size)  # エンコードの計算
-        t = Variable(xp.array([0 for _ in range(batch_size)], dtype='int32'))  # <eos>をデコーダーに読み込ませる
-        loss = Variable(xp.zeros((), dtype='float32'))  # 損失の初期化
+        t = Variable(
+            xp.array([0 for _ in range(batch_size)], dtype="int32")
+        )  # <eos>をデコーダーに読み込ませる
+        loss = Variable(xp.zeros((), dtype="float32"))  # 損失の初期化
         ys = []  # デコーダーが生成する単語を記録するリスト
 
         # 予測の場合はデコード文字列を生成する
@@ -167,7 +187,7 @@ class AttSeq2Seq(Chain):
             y = self.decode(t)
             y = xp.argmax(y.data)  # 確率で出力されたままなので、確率が高い予測単語を取得する
             ys.append(y)
-            t = Variable(xp.array([y], dtype='int32'))
+            t = Variable(xp.array([y], dtype="int32"))
             if y == 0:  # EOSを出力したならばデコードを終了する
                 break
         return ys
@@ -180,22 +200,22 @@ class AttSeq2Seq(Chain):
         :return:
         """
         # 内部メモリ、中間ベクトルの初期化
-        c = Variable(xp.zeros((batch_size, self.hidden_size), dtype='float32'))
-        h = Variable(xp.zeros((batch_size, self.hidden_size), dtype='float32'))
+        c = Variable(xp.zeros((batch_size, self.hidden_size), dtype="float32"))
+        h = Variable(xp.zeros((batch_size, self.hidden_size), dtype="float32"))
         # 順向きのEncoderの計算
         for w in words:
             c, h = self.f_encoder(w, c, h)
-            self.fs.append(h) # 計算された中間ベクトルを記録
+            self.fs.append(h)  # 計算された中間ベクトルを記録
         # 内部メモリ、中間ベクトルの初期化
-        c = Variable(xp.zeros((batch_size, self.hidden_size), dtype='float32'))
-        h = Variable(xp.zeros((batch_size, self.hidden_size), dtype='float32'))
+        c = Variable(xp.zeros((batch_size, self.hidden_size), dtype="float32"))
+        h = Variable(xp.zeros((batch_size, self.hidden_size), dtype="float32"))
         # 逆向きのEncoderの計算
         for w in reversed(words):
             c, h = self.b_encoder(w, c, h)
-            self.bs.insert(0, h) # 計算された中間ベクトルを記録
+            self.bs.insert(0, h)  # 計算された中間ベクトルを記録
         # 内部メモリ、中間ベクトルの初期化
-        self.c = Variable(xp.zeros((batch_size, self.hidden_size), dtype='float32'))
-        self.h = Variable(xp.zeros((batch_size, self.hidden_size), dtype='float32'))
+        self.c = Variable(xp.zeros((batch_size, self.hidden_size), dtype="float32"))
+        self.h = Variable(xp.zeros((batch_size, self.hidden_size), dtype="float32"))
 
     def decode(self, w):
         """
