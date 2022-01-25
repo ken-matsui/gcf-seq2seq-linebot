@@ -3,8 +3,6 @@ import os
 from chainer import cuda
 import numpy as np
 from google.cloud import language
-from google.cloud.language import enums
-from google.cloud.language import types
 from google.cloud import storage
 
 FLAG_GPU = False
@@ -42,10 +40,10 @@ class DataConverter:
         """
         # Natural Language API
         # The text to analyze
-        document = types.Document(content=sentence, type=enums.Document.Type.PLAIN_TEXT)
+        document = language.Document(content=sentence, type_=language.Document.Type.PLAIN_TEXT)
         # Detects syntax in the document. You can also analyze HTML with:
-        #   document.type == enums.Document.Type.HTML
-        tokens = self.client.analyze_syntax(document).tokens
+        #   document.type == language.Document.Type.HTML
+        tokens = self.client.analyze_syntax(request={'document': document}).tokens
 
         sentence_words = []
         for token in tokens:
@@ -55,7 +53,7 @@ class DataConverter:
         sentence_words.append("<eos>")  # 最後にvocabに登録している<eos>を代入する
         return sentence_words
 
-    def sentence2ids(self, sentence, sentence_type="query"):
+    def sentence2ids(self, sentence):
         """
         文章を単語IDのNumpy配列に変換して返却する
         :param sentence: 文章文字列
