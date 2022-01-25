@@ -44,8 +44,8 @@ def create_decoder():
     npz_path = '/tmp/' + npz
     # tmp comment
     if not os.path.isfile(npz_path):
-        bucket = storage_client.get_bucket('model-files')  # rootとなるbucketを指定
-        blob = storage.Blob('chainer/att-seq2seq/v1/' + npz, bucket)  # rootから子を指定
+        bucket = storage_client.get_bucket(os.environ['BUCKET_NAME'])  # rootとなるbucketを指定
+        blob = storage.Blob('att-seq2seq/v1/' + npz, bucket)  # rootから子を指定
         with open(npz_path, 'wb') as file_obj:  # localに保存するファイルを指定
             blob.download_to_file(file_obj)
         return Decoder(model, data_converter, npz_path)

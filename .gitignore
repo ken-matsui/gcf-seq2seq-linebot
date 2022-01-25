@@ -1,5 +1,3 @@
-app.yaml
-
 venv
 
 __pycache__
@@ -9,4 +7,4 @@ __pycache__
 
 .idea
 
-matsui*
+.env.yaml

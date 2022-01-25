@@ -1,4 +1,4 @@
-# coding: utf-8
+import os
 
 from chainer import cuda
 import numpy as np
@@ -28,7 +28,7 @@ class DataConverter:
 		# CloudStorageからvocabファイルをDownload
 		txt = 'vocab.txt'
 		storage_client = storage.Client()
-		bucket = storage_client.get_bucket('ml-datas')
+		bucket = storage_client.get_bucket(os.environ['BUCKET_NAME'])
 		blob = storage.Blob('att-seq2seq/v1/' + txt, bucket)
 		lines = blob.download_as_string().decode('utf-8').split('\n')
 		for i, line in enumerate(lines):
