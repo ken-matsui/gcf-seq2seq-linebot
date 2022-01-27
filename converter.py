@@ -1,8 +1,8 @@
 import os
 
+import requests
 from chainer import cuda
 import numpy as np
-from google.cloud import language
 from google.cloud import storage
 
 FLAG_GPU = False
@@ -12,6 +12,9 @@ if FLAG_GPU:
 else:
     xp = np
 
+MECAB_SERVICE_DOMAIN = os.environ["MECAB_SERVICE_DOMAIN"]
+MECAB_SERVICE_URL = f"https://{MECAB_SERVICE_DOMAIN}/mecab/v1/parse-neologd"
+
 
 # データ変換クラスの定義
 class DataConverter:
@@ -19,8 +22,6 @@ class DataConverter:
         """
         クラスの初期化
         """
-        # Instantiates a client
-        self.client = language.LanguageServiceClient()
         # 単語辞書の登録
         self.vocab = {}
         # CloudStorageからvocabファイルをDownload
@@ -29,30 +30,26 @@ class DataConverter:
         bucket = storage_client.get_bucket(os.environ["BUCKET_NAME"])
         blob = storage.Blob("att-seq2seq/v1/" + txt, bucket)
         lines = blob.download_as_string().decode("utf-8").split("\n")
-        for i, line in enumerate(lines):
+        i = 0
+        for line in lines:
             if line:  # 空行を弾く
                 self.vocab[line] = i
+                i += 1
 
-    def sentence2words(self, sentence):
+    @staticmethod
+    def sentence2words(sentence):
         """
         文章を単語の配列にして返却する
         :param sentence: 文章文字列
         """
-        # Natural Language API
-        # The text to analyze
-        document = language.Document(
-            content=sentence, type_=language.Document.Type.PLAIN_TEXT
-        )
-        # Detects syntax in the document. You can also analyze HTML with:
-        #   document.type == language.Document.Type.HTML
-        tokens = self.client.analyze_syntax(request={"document": document}).tokens
-
         sentence_words = []
-        for token in tokens:
-            w = token.text.content  # 単語
-            if len(w) != 0:  # 不正文字は省略
-                sentence_words.append(w)
-        sentence_words.append("<eos>")  # 最後にvocabに登録している<eos>を代入する
+        response = requests.post(MECAB_SERVICE_URL, json={"sentence": sentence})
+        for m in response.json()["results"]:
+            w = m.split("\t")[0].lower()
+            if (len(w) == 0) or (w == "eos"):
+                continue
+            sentence_words.append(w)
+        sentence_words.append("<eos>")
         return sentence_words
 
     def sentence2ids(self, sentence):
@@ -63,7 +60,7 @@ class DataConverter:
         :return: 単語IDのNumpy配列
         """
         ids = []  # 単語IDに変換して格納する配列
-        sentence_words = self.sentence2words(sentence)  # 文章を単語に分解する
+        sentence_words = DataConverter.sentence2words(sentence)  # 文章を単語に分解する
         for word in sentence_words:
             if word in self.vocab:  # 単語辞書に存在する単語ならば、IDに変換する
                 ids.append(self.vocab[word])

@@ -50,9 +50,9 @@ def create_decoder():
         blob = storage.Blob("att-seq2seq/v1/" + npz, bucket)  # rootから子を指定
         with open(npz_path, "wb") as file_obj:  # localに保存するファイルを指定
             blob.download_to_file(file_obj)
-        return Decoder(model, data_converter, npz_path)
+        return Decoder(model, data_converter, BATCH_COL_SIZE, npz_path)
     else:
-        return Decoder(model, data_converter, npz_path)
+        return Decoder(model, data_converter, BATCH_COL_SIZE, npz_path)
 
 
 DECODER = create_decoder()
