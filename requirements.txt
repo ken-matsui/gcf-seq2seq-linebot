@@ -1,4 +1,4 @@
-line-bot-sdk==2.0.1
+line-bot-sdk==2.1.0
 chainer==7.8.1
 google-cloud-core==2.2.2
 google-cloud-language==2.3.2
