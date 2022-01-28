@@ -1,21 +1,18 @@
 # coding: utf-8
 
+import json
+import logging
 import os
 import sys
-import logging
-import json
 from datetime import datetime, timedelta
 
-from linebot import LineBotApi, WebhookHandler
-from linebot.models import (
-    TextSendMessage,
-)
 from google.cloud import storage
+from linebot import LineBotApi, WebhookHandler
+from linebot.models import TextSendMessage
 
-from att_seq2seq.model import AttSeq2Seq
 from att_seq2seq.decoder import Decoder
+from att_seq2seq.model import AttSeq2Seq
 from converter import DataConverter
-
 
 EMBED_SIZE = 100
 HIDDEN_SIZE = 100

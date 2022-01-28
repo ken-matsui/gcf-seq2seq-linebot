@@ -1,5 +1,5 @@
-from chainer import serializers
 import numpy as np
+from chainer import serializers
 
 FLAG_GPU = False
 if FLAG_GPU:
@@ -27,14 +27,14 @@ class Decoder(object):
         # エンコードの計算
         self.model.encode(enc_query, encode_batch_size)
         # <eos>をデコーダーに読み込ませる
-        t = xp.array([0] * encode_batch_size, dtype='int32')
+        t = xp.array([0] * encode_batch_size, dtype="int32")
         # デコーダーが生成する単語IDリスト
         ys = []
         for i in range(self.decode_max_size):
             y = self.model.decode(t)
             y = xp.argmax(y.data)  # 確率で出力されたままなので、確率が高い予測単語を取得する
             ys.append(y)
-            t = xp.array([y], dtype='int32')
+            t = xp.array([y], dtype="int32")
             if y == 0:  # <EOS>を出力したならばデコードを終了する
                 break
         # IDから，文字列に変換する

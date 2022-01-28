@@ -1,8 +1,10 @@
 import os
 
+import google.auth.transport.requests
+import google.oauth2.id_token
+import numpy as np
 import requests
 from chainer import cuda
-import numpy as np
 from google.cloud import storage
 
 FLAG_GPU = False
@@ -43,7 +45,14 @@ class DataConverter:
         :param sentence: 文章文字列
         """
         sentence_words = []
-        response = requests.post(MECAB_SERVICE_URL, json={"sentence": sentence})
+
+        auth_req = google.auth.transport.requests.Request()
+        id_token = google.oauth2.id_token.fetch_id_token(auth_req, MECAB_SERVICE_URL)
+        headers = {"Authorization": f"Bearer {id_token}"}
+        response = requests.post(
+            MECAB_SERVICE_URL, headers=headers, json={"sentence": sentence}
+        )
+
         for m in response.json()["results"]:
             w = m.split("\t")[0].lower()
             if (len(w) == 0) or (w == "eos"):

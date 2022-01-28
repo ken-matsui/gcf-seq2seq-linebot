@@ -2,8 +2,8 @@
 
 import chainer.functions as F
 import chainer.links as L
-from chainer import Chain, Variable, cuda
 import numpy as np
+from chainer import Chain, Variable, cuda
 
 FLAG_GPU = False
 if FLAG_GPU:
